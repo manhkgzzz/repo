@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kho Tài Liệu Cá Nhân - 2027</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b1120;
+            --card-bg: #111827;
+            --card-hover: #1e293b;
+            --border: #1f2937;
+            --text-main: #f9fafb;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --folder-color: #f59e0b;
+            --file-color: #3b82f6;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0b1120 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header & Breadcrumbs */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb a {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .current-path {
+            font-weight: 800;
+            color: var(--text-main);
+            font-size: 26px;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        /* Actions Bar */
+        .actions-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .action-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .action-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .flex-row { display: flex; gap: 10px; }
+
+        input[type="text"], input[type="file"], textarea {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus { border-color: var(--primary); }
+        input[type="file"] { padding: 9px; border: 1px dashed var(--border); cursor: pointer; }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1557b0; }
+        
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: var(--card-hover); }
+
+        /* Grid Display */
+        .vault-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid var(--border);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            background: var(--card-hover);
+        }
+
+        .icon { font-size: 48px; margin-bottom: 15px; }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 15px;
+            word-break: break-all;
+            height: 40px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            color: var(--text-main);
+        }
+
+        .doc-note {
+            font-size: 12px; color: var(--warning); font-style: italic; margin-bottom: 15px; 
+            max-height: 35px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        }
+
+        .item-actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .folder-card { border-top: 4px solid var(--folder-color); }
+        .file-card { border-top: 4px solid var(--file-color); }
+
+        .tag {
+            font-size: 10px; text-transform: uppercase; font-weight: 800; padding: 3px 8px;
+            border-radius: 6px; position: absolute; top: 12px; right: 12px;
+        }
+        .tag-folder { background: rgba(245, 158, 11, 0.1); color: var(--folder-color); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .tag-file { background: rgba(59, 130, 246, 0.1); color: var(--file-color); border: 1px solid rgba(59, 130, 246, 0.2); }
+
+        /* Modal Preview */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000; backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: relative; width: 90%; height: 90%; margin: 2% auto;
+            background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid var(--border);
+        }
+
+        .modal-header {
+            padding: 15px 20px; background: #0f172a; color: white;
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border);
+        }
+
+        .close-modal { background: var(--danger); color: white; border: none; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        iframe { width: 100%; height: calc(100% - 60px); border: none; background: #fff; }
+
+        .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px; color: var(--text-muted); background: var(--card-bg); border-radius: 16px; border: 1px dashed var(--border); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <div class="breadcrumb">
+                <a href="/">Tổng Hành Dinh</a> 
+                <span>/</span>
+                <a href="/vault">Kho tài liệu</a>
+                {% if current_f %} <span>/</span> <span style="color: var(--text-main);">{{ current_f.name }}</span> {% endif %}
+            </div>
+            <div class="current-path">
+                {% if current_f %} 📂 {{ current_f.name }} {% else %} 🏠 Thư mục gốc {% endif %}
+            </div>
+        </div>
+        <a href="/" class="btn btn-outline">⬅ Trở về Dashboard</a>
+    </div>
+
+    <!-- Thanh công cụ tạo & upload được thiết kế lại để nhận Form Ghi chú / Link -->
+    <div class="actions-bar">
+        {% if not current_f %}
+        <div class="action-card">
+            <h3 style="color: var(--folder-color);">📁 Tạo thư mục lưu trữ mới</h3>
+            <form method="POST" class="input-group">
+                <div class="flex-row">
+                    <input type="text" name="folder_name" placeholder="Tên môn học / loại tài liệu..." required>
+                    <button type="submit" class="btn btn-primary" style="background: var(--folder-color);">Tạo</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="action-card" {% if current_f %}style="grid-column: 1 / -1;"{% endif %}>
+            <h3>⬆ Thêm tài liệu mới vào {% if current_f %}thư mục này{% else %}kho gốc{% endif %}</h3>
+            
+            <!-- Đã thêm Tính năng Ghi chú & Link -->
+            <form method="POST" enctype="multipart/form-data" class="input-group">
+                <input type="hidden" name="is_upload" value="1">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <input type="file" name="document">
+                        <small style="color: var(--text-muted); font-size: 11px; margin-top: 5px; display: block;">(Có thể để trống nếu chỉ muốn lưu Link)</small>
+                    </div>
+                    <div>
+                        <input type="text" name="doc_link" placeholder="🔗 Dán link (Drive, Youtube, Web...)">
+                    </div>
+                </div>
+                
+                <textarea name="doc_note" rows="2" placeholder="📝 Nhập ghi chú nhắc nhở cho tài liệu này..."></textarea>
+                
+                <button type="submit" class="btn btn-primary">Lưu Tài Liệu</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Danh sách hiển thị -->
+    <div class="vault-grid">
+        {% if current_f %}
+        <a href="/vault" class="item-card folder-card" style="text-decoration: none; color: inherit; justify-content: center; background: rgba(245, 158, 11, 0.05);">
+            <div class="icon">🔙</div>
+            <div class="item-name">Quay lại thư mục gốc</div>
+        </a>
+        {% endif %}
+
+        <!-- Thư mục -->
+        {% for f in folders %}
+        <div class="item-card folder-card">
+            <span class="tag tag-folder">Thư mục</span>
+            <div class="icon">📁</div>
+            <div class="item-name">{{ f.name }}</div>
+            <div class="item-actions">
+                <a href="/vault/{{ f.id }}" class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; background: var(--folder-color);">Mở</a>
+                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="editFolder('{{ f.id }}', '{{ f.name }}')">Sửa</button>
+                <a href="/vault/del_folder/{{ f.id }}" class="btn" style="padding: 6px 12px; font-size: 12px; background: var(--danger); color: white;" onclick="return confirm('Cảnh báo: Xóa thư mục sẽ xóa sạch tài liệu bên trong! Tiếp tục?')">Xóa</a>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Tài liệu (Hỗ trợ hiển thị Ghi chú và Link) -->
+        {% for d in docs %}
+        <div class="item-card file-card">
+            <span class="tag tag-file">Tài liệu</span>
+            <div class="icon">📄</div>
+            
+            <div class="item-name" title="{{ d.original_name }}">{{ d.original_name }}</div>
+            
+            {% if d.note %}
+            <div class="doc-note">📝 {{ d.note }}</div>
+            {% endif %}
+
+            <div class="item-actions">
+                {% if d.filename %}
+                <button class="btn btn-primary" style="padding: 6px 10px; font-size: 11px;" onclick="viewFile('{{ url_for('static', filename='uploads/' + d.filename) }}', '{{ d.original_name }}')">Mở File</button>
+                {% endif %}
+                
+                {% if d.link %}
+                <a href="{{ d.link }}" target="_blank" class="btn" style="padding: 6px 10px; font-size: 11px; background: var(--success); color: white;">Mở Link</a>
+                {% endif %}
+                
+                <a href="/delete_doc/{{ d.id }}" class="btn" style="padding: 6px 10px; font-size: 11px; background: #334155; color: white;" onclick="return confirm('Xóa vĩnh viễn tài liệu này?')">Xóa</a>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if not folders and not docs %}
+        <div class="empty-state">
+            <div style="font-size: 60px; margin-bottom: 20px;">🏜️</div>
+            <p>Chưa có gì ở đây cả. Hãy bắt đầu bằng cách tạo thư mục hoặc thêm tài liệu!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal xem file -->
+<div id="fileModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <strong id="modalTitle">Xem tài liệu</strong>
+            <button class="close-modal" onclick="closeModal()">Đóng X</button>
+        </div>
+        <iframe id="fileFrame"></iframe>
+    </div>
+</div>
+
+<!-- Form ẩn để sửa tên thư mục -->
+<form id="editFolderForm" method="POST" style="display: none;">
+    <input type="hidden" name="edit_f_id" id="edit_f_id">
+    <input type="hidden" name="new_name" id="new_name">
+</form>
+
+<script>
+    function viewFile(url, name) {
+        document.getElementById('fileFrame').src = url;
+        document.getElementById('modalTitle').innerText = "📄 Đang xem: " + name;
+        document.getElementById('fileModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('fileModal').style.display = 'none';
+        document.getElementById('fileFrame').src = '';
+    }
+
+    function editFolder(id, oldName) {
+        const newName = prompt("Nhập tên mới cho thư mục:", oldName);
+        if (newName && newName !== oldName) {
+            document.getElementById('edit_f_id').value = id;
+            document.getElementById('new_name').value = newName;
+            document.getElementById('editFolderForm').submit();
+        }
+    }
+
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('fileModal')) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>

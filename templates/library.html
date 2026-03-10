@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư Viện Cộng Đồng - 2027</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b1120;
+            --card-bg: #111827;
+            --card-hover: #1e293b;
+            --border: #1f2937;
+            --text-main: #f9fafb;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0b1120 100%);
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px; background: var(--card-bg); padding: 25px 30px; 
+            border-radius: 16px; border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .header h1 { 
+            margin: 0; font-size: 26px; font-weight: 800; 
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .btn {
+            padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; border: none; font-size: 14px;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-back { background: #334155; color: white; }
+        .btn-back:hover { background: #475569; }
+        
+        .btn-share { background: var(--primary); color: white; width: 100%; justify-content: center; }
+        .btn-view { background: var(--primary); color: white; flex: 1; justify-content: center;}
+        .btn-download { background: var(--success); color: white; flex: 1; justify-content: center;}
+        .btn-delete { background: var(--danger); color: white; padding: 10px; border-radius: 8px;}
+
+        /* Upload Form Card */
+        .share-card {
+            background: var(--card-bg); padding: 30px; border-radius: 16px;
+            box-shadow: var(--shadow); margin-bottom: 40px; border: 1px solid var(--border);
+            border-left: 5px solid var(--primary);
+        }
+        .share-card h2 { margin-top: 0; font-size: 20px; color: var(--primary); display: flex; align-items: center; gap: 10px;}
+
+        .form-grid {
+            display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 15px; align-items: end; margin-top: 20px;
+        }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        label { font-weight: 600; font-size: 13px; color: var(--text-muted); }
+        
+        input[type="text"], input[type="file"], select {
+            padding: 12px; border: 1px solid var(--border); border-radius: 10px;
+            font-size: 14px; outline: none; transition: 0.2s; background: #0f172a; color: white; font-family: inherit;
+        }
+        input:focus, select:focus { border-color: var(--primary); }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap;
+            padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);
+        }
+        .filter-btn {
+            background: transparent; border: 1px solid var(--border); color: var(--text-muted);
+            padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .filter-btn:hover { border-color: var(--primary); color: var(--text-main); }
+        .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Documents Display Grid */
+        .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+
+        .lib-item {
+            background: var(--card-bg); border-radius: 16px; padding: 25px;
+            border: 1px solid var(--border); transition: all 0.3s ease;
+            display: flex; flex-direction: column; position: relative; box-shadow: var(--shadow);
+            padding-top: 35px; /* Tạo khoảng trống cho Badge */
+        }
+        .lib-item:hover { transform: translateY(-5px); border-color: var(--primary); background: var(--card-hover); }
+
+        /* Category Badge */
+        .cat-badge {
+            position: absolute; top: -12px; left: 20px; background: var(--warning); color: #000;
+            padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); border: 2px solid var(--card-bg);
+        }
+
+        .file-icon {
+            width: 50px; height: 50px; background: rgba(59, 130, 246, 0.1); color: var(--primary);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-bottom: 15px;
+        }
+
+        .lib-info h3 { font-size: 17px; font-weight: 700; margin: 0 0 8px 0; color: var(--text-main); word-break: break-all; }
+        .contributor { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+        .contributor b { color: var(--primary); }
+
+        .lib-actions { margin-top: auto; display: flex; gap: 10px; }
+        .date-tag { font-size: 10px; color: var(--text-muted); margin-top: 15px; text-align: right; }
+
+        /* Preview Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; backdrop-filter: blur(5px); }
+        .modal-box { width: 90%; height: 90%; margin: 2% auto; background: white; border-radius: 12px; overflow: hidden; position: relative; }
+        .modal-header { padding: 15px 20px; background: #0f172a; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .close-btn { background: var(--danger); color: white; border: none; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        iframe { width: 100%; height: calc(100% - 55px); border: none; }
+
+        /* Toast Notifications */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--card-bg); border-left: 5px solid var(--success); box-shadow: 0 10px 25px rgba(0,0,0,0.5); padding: 15px 20px; border-radius: 8px; font-weight: bold; animation: slideIn 0.3s forwards; color: var(--text-main); border: 1px solid var(--border);}
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        #no-result { display: none; grid-column: 1 / -1; text-align: center; padding: 50px; color: var(--text-muted); border: 1px dashed var(--border); border-radius: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="toast-container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="toast">🔔 {{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+</div>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>📚 Thư Viện Cộng Đồng</h1>
+        <a href="/" class="btn btn-back">⬅ Dashboard</a>
+    </div>
+
+    <!-- Share Form Card -->
+    <div class="share-card">
+        <h2>🤝 Chia Sẻ Tri Thức</h2>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Góp sức xây dựng kho tri thức cho thế hệ Thủ Khoa 2027. Tài liệu sẽ hiển thị sau khi được Chủ tịch phê duyệt.</p>
+        
+        <form method="POST" enctype="multipart/form-data" class="form-grid">
+            <div class="form-group">
+                <label>Tiêu đề tài liệu:</label>
+                <input type="text" name="title" placeholder="VD: Đề cương Lý thuyết 12" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Phân loại môn:</label>
+                <select name="category" required>
+                    <option value="Toán Học">Toán Học</option>
+                    <option value="Vật Lý">Vật Lý</option>
+                    <option value="Hóa Học">Hóa Học</option>
+                    <option value="Tiếng Anh">Tiếng Anh</option>
+                    <option value="Ngữ Văn">Ngữ Văn</option>
+                    <option value="Đánh Giá Năng Lực">Đánh Giá Năng Lực</option>
+                    <option value="Khác">Khác</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Chọn tệp (PDF/Ảnh):</label>
+                <input type="file" name="doc" required>
+            </div>
+            <button type="submit" class="btn btn-share">🚀 Gửi Duyệt Ngay</button>
+        </form>
+    </div>
+
+    <!-- Thanh Bộ Lọc (Filter Bar) -->
+    <div class="filter-bar" id="filterBar">
+        <strong style="color: var(--text-muted); align-self: center; margin-right: 10px;">Lọc theo môn:</strong>
+        <button class="filter-btn active" onclick="filterCategory('Tất cả', this)">Tất cả</button>
+        <button class="filter-btn" onclick="filterCategory('Toán Học', this)">Toán Học</button>
+        <button class="filter-btn" onclick="filterCategory('Vật Lý', this)">Vật Lý</button>
+        <button class="filter-btn" onclick="filterCategory('Hóa Học', this)">Hóa Học</button>
+        <button class="filter-btn" onclick="filterCategory('Tiếng Anh', this)">Tiếng Anh</button>
+        <button class="filter-btn" onclick="filterCategory('Ngữ Văn', this)">Ngữ Văn</button>
+        <button class="filter-btn" onclick="filterCategory('Đánh Giá Năng Lực', this)">Đánh Giá Năng Lực</button>
+        <button class="filter-btn" onclick="filterCategory('Khác', this)">Khác</button>
+    </div>
+
+    <!-- Approved Documents Grid -->
+    <div class="lib-grid" id="documentGrid">
+        {% for doc in docs %}
+        <div class="lib-item" data-category="{{ doc.category or 'Khác' }}">
+            <div class="cat-badge">{{ doc.category or 'Khác' }}</div>
+            
+            <!-- Nút Xóa chỉ dành cho Admin -->
+            {% if current_user.is_authenticated and current_user.is_admin %}
+            <a href="{{ url_for('delete_library_doc', doc_id=doc.id) }}" class="btn-delete" style="position: absolute; top: 15px; right: 15px; text-decoration: none; z-index: 5;" onclick="return confirm('Xóa vĩnh viễn tài liệu này khỏi Thư viện?')">🗑️</a>
+            {% endif %}
+            
+            <div class="file-icon">📄</div>
+            <div class="lib-info">
+                <h3>{{ doc.title }}</h3>
+                <div class="contributor">Người đóng góp: <b>{{ doc.author_name }}</b></div>
+            </div>
+            
+            <div class="lib-actions">
+                <button class="btn btn-view" onclick="openFile('{{ url_for('static', filename='uploads/' + doc.filename) }}', '{{ doc.title }}')">📖 Đọc</button>
+                <a href="{{ url_for('static', filename='uploads/' + doc.filename) }}" download class="btn btn-download">📥 Tải về</a>
+            </div>
+            <div class="date-tag">Cập nhật: {{ doc.upload_date.strftime('%d/%m/%Y') }}</div>
+        </div>
+        {% else %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 100px; color: var(--text-muted); border: 1px dashed var(--border); border-radius: 16px; background: rgba(255,255,255,0.02);">
+            <div style="font-size: 64px; margin-bottom: 20px;">🏢</div>
+            <p>Thư viện hiện đang trống.<br>Hãy là người đầu tiên chia sẻ tri thức!</p>
+        </div>
+        {% endfor %}
+        
+        <!-- Thông báo khi lọc không có kết quả -->
+        <div id="no-result">
+            <div style="font-size: 40px; margin-bottom: 15px;">🔍</div>
+            <p>Không tìm thấy tài liệu nào thuộc môn học này.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="fileModal" class="modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <strong id="modalLabel">Xem tài liệu</strong>
+            <button class="close-btn" onclick="closeFile()">Đóng X</button>
+        </div>
+        <iframe id="viewFrame"></iframe>
+    </div>
+</div>
+
+<script>
+    // Logic Bộ lọc (Filter)
+    function filterCategory(category, btnElement) {
+        // Cập nhật trạng thái nút (Active)
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        btnElement.classList.add('active');
+
+        let hasVisibleItem = false;
+        const items = document.querySelectorAll('.lib-item');
+        
+        items.forEach(item => {
+            const itemCat = item.getAttribute('data-category');
+            if (category === 'Tất cả' || itemCat === category) {
+                item.style.display = 'flex';
+                hasVisibleItem = true;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        // Hiển thị thông báo nếu không có tài liệu nào
+        const noResultDiv = document.getElementById('no-result');
+        if (!hasVisibleItem && items.length > 0) {
+            noResultDiv.style.display = 'block';
+        } else {
+            noResultDiv.style.display = 'none';
+        }
+    }
+
+    // Logic Mở file
+    function openFile(url, title) {
+        document.getElementById('viewFrame').src = url;
+        document.getElementById('modalLabel').innerText = "📄 " + title;
+        document.getElementById('fileModal').style.display = 'block';
+    }
+
+    function closeFile() {
+        document.getElementById('fileModal').style.display = 'none';
+        document.getElementById('viewFrame').src = '';
+    }
+
+    // Đóng modal khi click ra ngoài vùng trắng
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('fileModal')) {
+            closeFile();
+        }
+    }
+    
+    // Tự động ẩn thông báo Flash Message sau 5 giây
+    setTimeout(() => {
+        document.querySelectorAll('.toast').forEach(t => {
+            t.style.animation = 'fadeOut 0.5s forwards';
+            setTimeout(() => t.remove(), 500);
+        });
+    }, 5000);
+</script>
+
+</body>
+</html>

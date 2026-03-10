@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điều Hành Tối Cao - 2027</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --vip: #f59e0b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            background-image: radial-gradient(circle at 20% 20%, #1e293b 0%, #0f172a 100%);
+            min-height: 100vh;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            margin: 0; font-size: 24px; font-weight: 800;
+            background: linear-gradient(to right, #60a5fa, #a855f7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .card {
+            background: var(--card); border-radius: 16px; border: 1px solid var(--border);
+            padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .card h2 { font-size: 18px; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+
+        /* Table Design */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 15px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; transition: 0.3s;}
+        tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* Highlight Học Sinh "Lươn Lẹo" Share Acc */
+        .suspicious td { background: rgba(239, 68, 68, 0.1) !important; border-bottom-color: var(--danger); }
+        .ip-warning { color: var(--danger); font-size: 11px; font-weight: 800; margin-top: 4px; display: flex; align-items: center; gap: 4px;}
+
+        /* Badges */
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+        .badge-vip { background: rgba(245, 158, 11, 0.1); color: var(--vip); border: 1px solid var(--vip); }
+        .badge-admin { background: rgba(59, 130, 246, 0.1); color: var(--primary); border: 1px solid var(--primary); }
+        .badge-user { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); border: 1px solid var(--border); }
+        .badge-banned { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 600;
+            font-size: 12px; transition: all 0.2s; border: none; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+
+        .btn-vip { background: var(--vip); color: white; }
+        .btn-vip:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-ban { background: #334155; color: white; }
+        .btn-ban:hover { background: var(--warning); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #dc2626; transform: translateY(-1px); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: var(--border); }
+        .btn-back { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar-small { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
+
+        .alert {
+            padding: 15px; background: rgba(16, 185, 129, 0.1); color: var(--success);
+            border-radius: 12px; border-left: 5px solid var(--success); margin-bottom: 20px; font-weight: 600;
+        }
+        .empty-state { text-align: center; padding: 30px; color: var(--text-muted); font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>👑 HỆ THỐNG ĐIỀU HÀNH TỐI CAO</h1>
+        <a href="/" class="btn btn-back">⬅ Dashboard</a>
+    </div>
+
+    <!-- Thông báo từ hệ thống -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert">✅ {{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- 1. PHẦN DUYỆT TÀI LIỆU -->
+    <div class="card">
+        <h2>📑 Tài Liệu Đang Chờ Phê Duyệt</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên tài liệu</th>
+                        <th>Người đóng góp</th>
+                        <th>Thời gian</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in pending_docs %}
+                    <tr>
+                        <td><strong style="color: var(--primary);">{{ doc.title }}</strong></td>
+                        <td>{{ doc.author_name }}</td>
+                        <td style="color: var(--text-muted);">{{ doc.upload_date.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <a href="{{ url_for('static', filename='uploads/' + doc.filename) }}" target="_blank" class="btn btn-outline">Xem Thử</a>
+                                <a href="{{ url_for('approve_doc', doc_id=doc.id) }}" class="btn btn-success">Duyệt ✅</a>
+                                <a href="{{ url_for('reject_doc', doc_id=doc.id) }}" class="btn btn-danger" onclick="return confirm('Loại bỏ tài liệu này vĩnh viễn?')">Từ Chối ❌</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="empty-state">Hiện tại không có tài liệu nào cần phê duyệt.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2. QUẢN LÝ THÀNH VIÊN & VIP -->
+    <div class="card">
+        <h2>👥 Danh Sách Học Viên & Giám Sát IP</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Học viên</th>
+                        <th>Liên hệ</th>
+                        <th>Phân loại</th>
+                        <th>Hành động Admin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <!-- Highlight nếu IP > 3 -->
+                    <tr class="{% if user.ip_count > 3 %}suspicious{% endif %}">
+                        <td>
+                            <div class="user-info">
+                                <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" class="avatar-small">
+                                <div>
+                                    <div style="font-weight: 700;">{{ user.username }}</div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">{{ user.email }}</div>
+                                    
+                                    {% if user.ip_count > 3 %}
+                                    <div class="ip-warning">⚠️ Chú Ý: Truy cập từ {{ user.ip_count }} thiết bị</div>
+                                    {% else %}
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Số thiết bị: {{ user.ip_count }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size: 13px;">📞 {{ user.phone }}</div>
+                            {% if user.fb_link %}
+                            <a href="{{ user.fb_link }}" target="_blank" style="font-size: 12px; color: var(--primary); text-decoration: none;">🔗 Facebook</a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                {% if user.is_admin %}
+                                <span class="badge badge-admin">ADMIN</span>
+                                {% elif user.is_vip %}
+                                <span class="badge badge-vip">VIP MEMBER</span>
+                                {% else %}
+                                <span class="badge badge-user">THÀỜNG</span>
+                                {% endif %}
+                                
+                                {% if user.is_banned %}
+                                <span class="badge badge-banned">ĐÃ KHÓA</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                <!-- Các nút ẩn đi nếu tài khoản này là Admin -->
+                                {% if not user.is_admin %}
+                                    <a href="{{ url_for('toggle_vip', user_id=user.id) }}" class="btn btn-vip" title="Cấp/Hủy quyền xem khóa học">
+                                        {{ 'Hủy VIP' if user.is_vip else '⭐ Cấp VIP' }}
+                                    </a>
+                                    
+                                    <a href="{{ url_for('reset_password', user_id=user.id) }}" class="btn btn-outline" onclick="return confirm('Reset mật khẩu của {{ user.username }} về 123456?')">Mật khẩu</a>
+
+                                    <a href="{{ url_for('toggle_ban', user_id=user.id) }}" class="btn btn-ban">
+                                        {{ 'Mở khóa' if user.is_banned else 'Khóa Nick' }}
+                                    </a>
+
+                                    <a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn btn-danger" onclick="return confirm('CẢNH BÁO TỐI CAO: Bạn sắp xóa vĩnh viễn tài khoản {{ user.username }} và mọi dữ liệu/tài liệu của họ. Không thể khôi phục. Tiếp tục?')">🗑️ Xóa</a>
+                                {% else %}
+                                    <span style="font-size: 12px; color: var(--text-muted); font-style: italic;">Không thể can thiệp</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

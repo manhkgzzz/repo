@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ Thống Thủ Khoa 2027</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b1120;
+            --card-bg: #111827;
+            --card-hover: #1e293b;
+            --border: #1f2937;
+            --text-main: #f9fafb;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0b1120 100%);
+            min-height: 100vh;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 30px; background: var(--card-bg); padding: 25px; 
+            border-radius: 16px; border: 1px solid var(--border);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        
+        .card { 
+            background: var(--card-bg); padding: 25px; border-radius: 16px; 
+            border: 1px solid var(--border); transition: all 0.3s; 
+            position: relative; overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); background: var(--card-hover); }
+        .card h3 { margin-top: 0; font-weight: 800; text-transform: uppercase; font-size: 15px; transition: 0.3s;}
+        
+        .progress-bg { background: #1e293b; height: 12px; border-radius: 10px; overflow: hidden; margin: 15px 0; }
+        .progress-fill { background: linear-gradient(90deg, #f59e0b, #ef4444); height: 100%; transition: width 0.5s; }
+        .timer-box { font-size: 28px; font-weight: 800; color: var(--danger); margin: 10px 0; text-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+        
+        .profile { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+        
+        .btn { padding: 12px 20px; border-radius: 8px; text-decoration: none; color: white; font-weight: 600; text-align: center; border: none; cursor: pointer; display: block; margin-top: 15px; font-size: 14px; transition: 0.2s;}
+        .btn:hover { filter: brightness(1.1); }
+        .btn-danger { background: var(--danger); color: white; padding: 8px 15px; font-size: 12px; border-radius: 6px; text-decoration: none; font-weight: bold;}
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 8px 15px; font-size: 12px; border-radius: 6px; text-decoration: none; font-weight: bold;}
+        .btn-admin { background: var(--success); color: white; padding: 8px 15px; font-size: 12px; border-radius: 6px; text-decoration: none; font-weight: bold;}
+        
+        /* Toast Notification */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--card-bg); border-left: 5px solid var(--warning); box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid var(--border); padding: 15px 20px; border-radius: 8px; font-weight: bold; animation: slideIn 0.3s ease forwards; color: var(--text-main); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* Pomodoro */
+        .pomo-timer { font-size: 48px; font-weight: 800; text-align: center; color: var(--danger); margin: 10px 0; font-variant-numeric: tabular-nums; text-shadow: 0 0 15px rgba(239, 68, 68, 0.4); transition: 0.3s;}
+        .pomo-controls { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .btn-pomo { padding: 10px 15px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 12px; transition: 0.2s;}
+        .btn-pomo:hover { filter: brightness(1.2); }
+    </style>
+</head>
+<body>
+
+<div class="toast-container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="toast" style="border-left-color: var(--warning);">🔔 {{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+</div>
+
+<div class="container">
+    {% if current_user.is_authenticated %}
+    <div class="header">
+        <div>
+            <h1 style="margin: 0; font-weight: 800; font-size: 28px; background: linear-gradient(to right, #60a5fa, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">TRANG CHỦ</h1>
+            <p style="margin: 5px 0 0 0; color: var(--text-muted); font-style: italic;">Trong sự cố gắng lúc nào cũng có sự cố!</p>
+        </div>
+        <div class="profile">
+            <img src="{{ url_for('static', filename='uploads/' + current_user.avatar) }}" class="avatar" alt="Avatar">
+            <div>
+                <strong style="font-size: 16px;">{{ current_user.username }}</strong><br>
+                <span style="font-size: 12px; color: var(--warning); font-weight: bold;">🔥 Streak: {{ current_user.streak_count }} ngày</span>
+            </div>
+            <div style="display: flex; gap: 5px; flex-direction: column;">
+                <div style="display: flex; gap: 5px;">
+                    <a href="/profile" class="btn-outline">⚙️ Hồ Sơ</a>
+                    {% if current_user.is_admin %}<a href="/admin/users" class="btn-admin">👑 Admin</a>{% endif %}
+                </div>
+                <a href="/logout" class="btn-danger" style="text-align: center;">Thoát</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- POMODORO TIMER NÂNG CẤP -->
+        <div class="card" id="pomo-card" style="border-top: 5px solid var(--danger); text-align: center;">
+            <h3 id="pomo-title" style="color: var(--danger);">🍅 Pomodoro: LÀM VIỆC</h3>
+            <div class="pomo-timer" id="time-display">25:00</div>
+            <div class="pomo-controls">
+                <button class="btn-pomo" id="start-pause-btn" style="background: var(--danger); color: white;">BẮT ĐẦU</button>
+                <button class="btn-pomo" id="reset-pomo-btn" style="background: #334155; color: white;">LÀM MỚI</button>
+                <button class="btn-pomo" id="skip-pomo-btn" style="background: var(--warning); color: #000;">BỎ QUA ⏭</button>
+            </div>
+            <p style="font-size: 12px; color: var(--text-muted); margin-top: 15px;">Hoàn thành 1 chu kỳ làm việc (25p) sẽ tự động cộng 25 phút vào Streak.</p>
+        </div>
+
+        <!-- 1. TIẾN ĐỘ STREAK -->
+        <div class="card" style="border-top: 5px solid var(--warning);">
+            <h3 style="color: var(--warning);">🔥 Kỷ luật 2H mỗi ngày</h3>
+            <h2 style="margin: 10px 0;"><span id="min">{{ current_user.seconds_today // 60 }}</span> / 120 phút</h2>
+            <div class="progress-bg">
+                <div class="progress-fill" id="pb" style="width: {{ (current_user.seconds_today / 7200) * 100 if (current_user.seconds_today / 7200) * 100 <= 100 else 100 }}%;"></div>
+            </div>
+            <p style="font-size: 12px; color: var(--success); font-weight: bold;">● Hệ thống đang tự động tính giờ học.</p>
+        </div>
+
+        <!-- 2. KHO TÀI LIỆU -->
+        <div class="card" style="border-top: 5px solid #0ea5e9;">
+            <h3 style="color: #0ea5e9;">📂 Kho Tài Liệu Cá Nhân</h3>
+            <p style="font-size: 13px; color: var(--text-muted); height: 40px;">Lưu trữ ghi chú, link và PDF riêng tư.</p>
+            <a href="/vault" class="btn" style="background: #0ea5e9;">Quản lý File</a>
+        </div>
+
+        <!-- 3. DANH MỤC KHÓA HỌC -->
+        <div class="card" style="border-top: 5px solid #8b5cf6;">
+            <h3 style="color: #8b5cf6;">🎓 Khóa Học VIP</h3>
+            <p style="font-size: 13px; color: var(--text-muted); height: 40px;">Lộ trình học tập chuyên sâu (Yêu cầu VIP).</p>
+            <a href="/courses" class="btn" style="background: #8b5cf6;">Vào Lộ Trình</a>
+        </div>
+
+        <!-- 4. KHU VỰC ĐĂNG KÝ VIP -->
+        <div class="card" style="border-top: 5px solid var(--warning); background: rgba(245, 158, 11, 0.05);">
+            <h3 style="color: var(--warning);">💎 Đăng Ký VIP Member</h3>
+            <p style="font-size: 13px; color: var(--text-muted); height: 40px;">Mở khóa đặc quyền truy cập Khóa học Online.</p>
+            <a href="/upgrade_vip" class="btn" style="background: var(--warning); color: #000;">Xem Hướng Dẫn Nạp</a>
+        </div>
+
+        <!-- 5. THƯ VIỆN CỘNG ĐỒNG -->
+        <div class="card" style="border-top: 5px solid #ec4899;">
+            <h3 style="color: #ec4899;">📚 Thư Viện Chung</h3>
+            <p style="font-size: 13px; color: var(--text-muted); height: 40px;">Chia sẻ tài liệu cho cộng đồng.</p>
+            <a href="/library" class="btn" style="background: #ec4899;">Vào Thư Viện</a>
+        </div>
+
+        <!-- 6. ĐẾM NGƯỢC THPTQG -->
+        <div class="card" style="border-top: 5px solid #f43f5e; text-align: center;">
+            <h3 style="color: #f43f5e;">🎓 THPTQG 2027</h3>
+            <div class="timer-box" id="countdown">Đang tải...</div>
+            <p style="font-size: 12px; color: var(--text-muted);">Cố gắng lên, mục tiêu đang ở rất gần!</p>
+        </div>
+    </div>
+
+    <script>
+        // Xóa thông báo sau 5 giây
+        setTimeout(() => {
+            document.querySelectorAll('.toast').forEach(t => {
+                t.style.animation = 'fadeOut 0.5s forwards';
+                setTimeout(() => t.remove(), 500);
+            });
+        }, 5000);
+
+        // ==========================================
+        // LÕI POMODORO THÔNG MINH
+        // ==========================================
+        const WORK_TIME = 25 * 60;
+        const BREAK_TIME = 5 * 60;
+        let pomoTime = WORK_TIME;
+        let pomoInterval = null;
+        let isRunning = false;
+        let isWorkPhase = true; // true = Làm việc, false = Nghỉ ngơi
+
+        if (Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+
+        // Cập nhật giao diện Đồng hồ
+        function updateDisplay() {
+            let m = Math.floor(pomoTime / 60);
+            let s = pomoTime % 60;
+            document.getElementById('time-display').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            
+            // Cập nhật màu sắc theo giai đoạn
+            let color = isWorkPhase ? "var(--danger)" : "var(--success)";
+            let title = isWorkPhase ? "🍅 Pomodoro: LÀM VIỆC" : "☕ Pomodoro: NGHỈ NGƠI";
+            
+            document.getElementById('pomo-title').innerText = title;
+            document.getElementById('pomo-title').style.color = color;
+            document.getElementById('time-display').style.color = color;
+            document.getElementById('pomo-card').style.borderTopColor = color;
+        }
+
+        function playSoundAndNotify(msg) {
+            let ctx = new (window.AudioContext || window.webkitAudioContext)();
+            let osc = ctx.createOscillator();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(800, ctx.currentTime);
+            osc.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.5);
+            
+            if (Notification.permission === "granted") {
+                new Notification("Đồng Hồ Pomodoro", { body: msg });
+            }
+            alert(msg);
+        }
+
+        // Nút Bắt đầu / Tạm dừng
+        document.getElementById('start-pause-btn').onclick = function() {
+            if(isRunning) {
+                // Đang chạy -> Tạm dừng
+                clearInterval(pomoInterval);
+                isRunning = false;
+                this.innerText = "TIẾP TỤC";
+                this.style.background = "var(--success)";
+            } else {
+                // Đang dừng -> Bắt đầu
+                isRunning = true;
+                this.innerText = "TẠM DỪNG";
+                this.style.background = "#f59e0b";
+                
+                pomoInterval = setInterval(() => {
+                    pomoTime--;
+                    updateDisplay();
+                    if(pomoTime <= 0) {
+                        clearInterval(pomoInterval);
+                        isRunning = false;
+                        this.innerText = "BẮT ĐẦU";
+                        this.style.background = isWorkPhase ? "var(--success)" : "var(--danger)";
+                        
+                        if(isWorkPhase) {
+                            playSoundAndNotify("Hoàn thành! Bạn được cộng 25 phút. Hãy nghỉ ngơi 5 phút nhé.");
+                            fetch('/update_time', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({seconds: 1500})
+                            }).then(r=>r.json()).then(updateStreakUI);
+                            
+                            isWorkPhase = false;
+                            pomoTime = BREAK_TIME;
+                        } else {
+                            playSoundAndNotify("Hết giờ nghỉ! Quay lại bàn làm việc nào Chủ tịch.");
+                            isWorkPhase = true;
+                            pomoTime = WORK_TIME;
+                        }
+                        updateDisplay();
+                    }
+                }, 1000);
+            }
+        };
+
+        // Nút Làm Mới (Reset)
+        document.getElementById('reset-pomo-btn').onclick = function() {
+            clearInterval(pomoInterval);
+            isRunning = false;
+            pomoTime = isWorkPhase ? WORK_TIME : BREAK_TIME;
+            
+            let btnStart = document.getElementById('start-pause-btn');
+            btnStart.innerText = "BẮT ĐẦU";
+            btnStart.style.background = isWorkPhase ? "var(--danger)" : "var(--success)";
+            updateDisplay();
+        };
+
+        // Nút Bỏ Qua (Skip Phase)
+        document.getElementById('skip-pomo-btn').onclick = function() {
+            if(confirm("Bạn có chắc muốn bỏ qua giai đoạn này? (Sẽ KHÔNG được cộng thời gian vào chuỗi học)")) {
+                clearInterval(pomoInterval);
+                isRunning = false;
+                isWorkPhase = !isWorkPhase; // Đảo ngược giai đoạn
+                pomoTime = isWorkPhase ? WORK_TIME : BREAK_TIME;
+                
+                let btnStart = document.getElementById('start-pause-btn');
+                btnStart.innerText = "BẮT ĐẦU";
+                btnStart.style.background = isWorkPhase ? "var(--danger)" : "var(--success)";
+                updateDisplay();
+            }
+        };
+
+        // Khởi tạo hiển thị ban đầu
+        updateDisplay();
+
+        // ==========================================
+        // CẬP NHẬT UI STREAK & ĐỒNG HỒ THPTQG
+        // ==========================================
+        function updateStreakUI(data) {
+            document.getElementById('min').innerText = Math.floor(data.seconds_today / 60);
+            let p = (data.seconds_today / 7200) * 100;
+            document.getElementById('pb').style.width = (p > 100 ? 100 : p) + '%';
+        }
+
+        // Cập nhật thời gian streak tự động nhỏ giọt mỗi 10 giây
+        setInterval(() => {
+            fetch('/update_time', {method:'POST'}).then(r => r.json()).then(updateStreakUI);
+        }, 10000);
+
+        function updateCountdown() {
+            const target = new Date("June 1, 2027 00:00:00").getTime();
+            const diff = target - new Date().getTime();
+            if (diff < 0) { document.getElementById("countdown").innerHTML = "CHIẾN ĐẤU!"; return; }
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            document.getElementById("countdown").innerHTML = `${d}d ${h}h ${m}m ${s}s`;
+        }
+        setInterval(updateCountdown, 1000);
+    </script>
+
+    {% else %}
+    <div style="text-align: center; margin-top: 100px;">
+        <h1 style="font-size: 42px; background: linear-gradient(to right, #60a5fa, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">HỆ THỐNG THỦ KHOA 2027</h1>
+        <p style="color: var(--text-muted); font-size: 18px;">Nền tảng quản lý học tập tối ưu dành riêng cho VIP.</p>
+        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 40px;">
+            <a href="/login" class="btn" style="background: var(--primary); width: 180px; margin: 0; font-size: 16px;">Đăng nhập</a>
+            <a href="/register" class="btn" style="background: var(--success); width: 180px; margin: 0; font-size: 16px;">Đăng ký</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+</body>
+</html>
